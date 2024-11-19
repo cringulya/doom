@@ -7,8 +7,9 @@
   - [[#evil-tweaks][Evil tweaks]]
   - [[#keybindings][Keybindings]]
 - [[#plugins][Plugins]]
-  - [[#neotree][Neotree]]
   - [[#dired][Dired]]
+  - [[#completion][Completion]]
+  - [[#coding][Coding]]
 
 * Init
 ** Theme
@@ -48,25 +49,11 @@
       :n "C-l" #'evil-window-right
       :n "Q" #'kill-this-buffer
       :n "L" #'evil-end-of-line
-      :n "H" #'evil-beginning-of-line)
-
-(map! :n "C-n" #'neotree-toggle)
-
+      :n "H" #'evil-beginning-of-line
+      :n "s-F" #'lsp-format-buffer)
 #+end_src
 
 * Plugins
-** Neotree
-#+begin_src emacs-lisp
-(after! neotree
-  (map! :map neotree-mode-map
-        ;; Example keybindings for NeoTree
-        :n "<escape>"   #'neotree-hide
-        :n "o"   #'neotree-open-file-in-system
-        :n "h"   #'neotree-select-up-node
-        :n "l"   #'neotree-enter
-        ))
-#+end_src
-
 ** Dired
 #+begin_src emacs-lisp
 (defun vertico-kill-buffer ()
@@ -77,4 +64,16 @@
 
 (map! :map vertico-map
       "C-d" #'vertico-kill-buffer)
+#+end_src
+
+** Completion
+#+begin_src emacs-lisp
+#+end_src
+
+
+** Coding
+*** C/C++
+#+begin_src emacs-lisp
+(use-package! cmake-ide
+  :config (cmake-ide-setup))
 #+end_src
