@@ -6,6 +6,9 @@
   - [[#font][Font]]
   - [[#evil-tweaks][Evil tweaks]]
   - [[#keybindings][Keybindings]]
+- [[#plugins][Plugins]]
+  - [[#neotree][Neotree]]
+  - [[#dired][Dired]]
 
 * Init
 ** Theme
@@ -26,21 +29,52 @@
 (remove-hook 'doom-first-input-hook #'evil-snipe-mode)
 
 ;; enable clipboard
+(setq select-enable-clipboard t
+      select-enable-primary t
+      save-interprogram-paste-before-kill t
+      mouse-yank-at-point t)
+
 (setq-default evil-clipboard t)
 #+end_src
 
 
 ** Keybindings
 #+begin_src emacs-lisp
-(general-define-key
-     :states 'normal
-     "C-r" 'undo-redo
-     "C-j" 'evil-window-down
-     "C-k" 'evil-window-up
-     "C-h" 'evil-window-left
-     "C-l" 'evil-window-right
-     "Q" 'kill-this-buffer
-     "L" 'evil-end-of-line
-     "H" 'evil-beginning-of-line
-     )
+
+(map! :n "C-r" #'undo-redo
+      :n "C-j" #'evil-window-down
+      :n "C-k" #'evil-window-up
+      :n "C-h" #'evil-window-left
+      :n "C-l" #'evil-window-right
+      :n "Q" #'kill-this-buffer
+      :n "L" #'evil-end-of-line
+      :n "H" #'evil-beginning-of-line)
+
+(map! :n "C-n" #'neotree-toggle)
+
+#+end_src
+
+* Plugins
+** Neotree
+#+begin_src emacs-lisp
+(after! neotree
+  (map! :map neotree-mode-map
+        ;; Example keybindings for NeoTree
+        :n "<escape>"   #'neotree-hide
+        :n "o"   #'neotree-open-file-in-system
+        :n "h"   #'neotree-select-up-node
+        :n "l"   #'neotree-enter
+        ))
+#+end_src
+
+** Dired
+#+begin_src emacs-lisp
+(defun vertico-kill-buffer ()
+  (interactive)
+  (when-let ((buffer (get-buffer (vertico--candidate))))
+    (kill-buffer buffer)
+    (message "Killed buffer: %s" (buffer-name buffer))))
+
+(map! :map vertico-map
+      "C-d" #'vertico-kill-buffer)
 #+end_src
