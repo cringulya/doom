@@ -1,27 +1,40 @@
-#+title: Config
+#+title: doom-emacs config
+#+author: Artem Son
+#+startup: content
 
 * TABLE OF CONTENTS :toc:
-- [[#init][Init]]
-  - [[#theme][Theme]]
-  - [[#font][Font]]
+- [[#theme][Theme]]
+- [[#font][Font]]
+- [[#options][Options]]
   - [[#evil-tweaks][Evil tweaks]]
-  - [[#keybindings][Keybindings]]
+- [[#keybindings][Keybindings]]
 - [[#plugins][Plugins]]
   - [[#dired][Dired]]
   - [[#completion][Completion]]
-  - [[#coding][Coding]]
+- [[#coding][Coding]]
+  - [[#lsp][Lsp]]
+  - [[#cc][C/C++]]
+  - [[#latex][Latex]]
 
-* Init
-** Theme
+* Theme
 #+begin_src emacs-lisp
 (setq doom-theme 'doom-dracula)
 #+end_src
 
-** Font
+* Font
 #+begin_src emacs-lisp
-(setq doom-font (font-spec :family "Iosevka Nerd Font Mono" :size 20 :weight 'regular)
+(setq doom-font (font-spec :family "Iosevka Nerd Font Mono" :size 22 :weight 'regular)
       doom-symbol-font (font-spec :family "Iosevka Nerd Font Mono")
       doom-big-font (font-spec :family "Iosevka Nerd Font Mono" :size 24))
+#+end_src
+
+* Options
+Quality of life options
+#+begin_src emacs-lisp
+(setq-default tab-width 2)
+(setq display-line-numbers 'relative)
+
+(+global-word-wrap-mode +1)
 #+end_src
 
 ** Evil tweaks
@@ -35,23 +48,26 @@
       save-interprogram-paste-before-kill t
       mouse-yank-at-point t)
 
-(setq-default evil-clipboard t)
+(map! :map evil-insert-state-map
+      :gi "C-v" #'clipboard-yank)
+
+(map! :map evil-visual-state-map
+      :gv "C-c" #'clipboard-kill-ring-save)
 #+end_src
 
-
-** Keybindings
+* Keybindings
 #+begin_src emacs-lisp
-
 (map! :map evil-normal-state-map
-      :n "C-r" #'undo-redo
-      :n "C-j" #'evil-window-down
-      :n "C-k" #'evil-window-up
-      :n "C-h" #'evil-window-left
-      :n "C-l" #'evil-window-right
-      :n "Q" #'kill-this-buffer
-      :n "L" #'evil-end-of-line
-      :n "H" #'evil-beginning-of-line
-      :n "M-F" #'lsp-format-buffer)
+      "C-r" #'undo-redo
+      "C-j" #'evil-window-down
+      "C-k" #'evil-window-up
+      "C-h" #'evil-window-left
+      "C-l" #'evil-window-right
+      "Q" #'kill-this-buffer
+      "L" #'evil-end-of-line
+      "H" #'evil-beginning-of-line
+      "M-F" #'+format-lsp-buffer
+      "` RET" #'projectile-run-command)
 #+end_src
 
 * Plugins
@@ -69,37 +85,41 @@
 
 ** Completion
 #+begin_src emacs-lisp
-(setq tab-always-indent t)
-(defun my/indent-or-complete ()
-  (interactive)
-  (if (and (bound-and-true-p corfu-mode) (corfu-popupinfo--visible-p))
-    (corfu-complete)  ;; Complete if the corfu popup is active
-    (doom/dumb-indent)))  ;; Otherwise, indent the current line
-
 (after! corfu
-  (setq +corfu-want-ret-to-confirm t)
   (setq +corfu-want-tab-prefer-expand-snippets t)
   (setq +corfu-want-tab-prefer-navigating-snippets t)
   (setq +corfu-want-tab-prefer-navigating-org-tables t)
   (setq corfu-preview-current nil)
   (setq corfu-preselect 'first)
 
-  (map! :map corfu-mode-map
-        :gi "TAB"     #'my/indent-or-complete
-        :gi "<tab>"     #'my/indent-or-complete)
   (map! :map corfu-map
-        :gi "TAB"     #'corfu-insert
-        :gi "<tab>"     #'corfu-insert))
+        :i "<tab>"     (lambda() (interactive) (corfu-insert) (corfu-complete))))
 #+end_src
 
-** Coding
-*** Lsp
+* Coding
+** Lsp
+#+begin_src emacs-lisp
+#+end_src
+** C/C++
 #+begin_src emacs-lisp
 (after! lsp-mode
   (setq lsp-clients-clangd-executable "clangd")) ; Ensure `clangd` is installed
-#+end_src
-*** C/C++
-#+begin_src emacs-lisp
+
 (use-package! cmake-ide
   :config (cmake-ide-setup))
+
+(map! :map c++-mode-map
+      :leader
+      :prefix ("l", "lsp")
+      :desc "Switch between header/source" "h" #'lsp-clangd-find-other-file)
+
+#+end_src
+
+** Latex
+#+begin_src emacs-lisp
+(after! tex
+  (setq tex-output-dir "build"))
+
+(add-hook 'latex-mode-hook (lambda ()
+                             (add-hook 'after-save-hook #'TeX-command-run-all nil t)))
 #+end_src
