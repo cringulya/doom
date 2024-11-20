@@ -42,7 +42,8 @@
 ** Keybindings
 #+begin_src emacs-lisp
 
-(map! :n "C-r" #'undo-redo
+(map! :map evil-normal-state-map
+      :n "C-r" #'undo-redo
       :n "C-j" #'evil-window-down
       :n "C-k" #'evil-window-up
       :n "C-h" #'evil-window-left
@@ -50,7 +51,7 @@
       :n "Q" #'kill-this-buffer
       :n "L" #'evil-end-of-line
       :n "H" #'evil-beginning-of-line
-      :n "s-F" #'lsp-format-buffer)
+      :n "M-F" #'lsp-format-buffer)
 #+end_src
 
 * Plugins
@@ -68,10 +69,35 @@
 
 ** Completion
 #+begin_src emacs-lisp
+(setq tab-always-indent t)
+(defun my/indent-or-complete ()
+  (interactive)
+  (if (and (bound-and-true-p corfu-mode) (corfu-popupinfo--visible-p))
+    (corfu-complete)  ;; Complete if the corfu popup is active
+    (doom/dumb-indent)))  ;; Otherwise, indent the current line
+
+(after! corfu
+  (setq +corfu-want-ret-to-confirm t)
+  (setq +corfu-want-tab-prefer-expand-snippets t)
+  (setq +corfu-want-tab-prefer-navigating-snippets t)
+  (setq +corfu-want-tab-prefer-navigating-org-tables t)
+  (setq corfu-preview-current nil)
+  (setq corfu-preselect 'first)
+
+  (map! :map corfu-mode-map
+        :gi "TAB"     #'my/indent-or-complete
+        :gi "<tab>"     #'my/indent-or-complete)
+  (map! :map corfu-map
+        :gi "TAB"     #'corfu-insert
+        :gi "<tab>"     #'corfu-insert))
 #+end_src
 
-
 ** Coding
+*** Lsp
+#+begin_src emacs-lisp
+(after! lsp-mode
+  (setq lsp-clients-clangd-executable "clangd")) ; Ensure `clangd` is installed
+#+end_src
 *** C/C++
 #+begin_src emacs-lisp
 (use-package! cmake-ide
