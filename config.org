@@ -18,7 +18,7 @@
 
 * Theme
 #+begin_src emacs-lisp
-(setq doom-theme 'doom-dracula)
+(setq doom-theme 'doom-tokyo-night)
 #+end_src
 
 * Font
@@ -86,6 +86,7 @@ Quality of life options
 ** Completion
 #+begin_src emacs-lisp
 (after! corfu
+  (setq +corfu-want-ret-to-confirm t)
   (setq +corfu-want-tab-prefer-expand-snippets t)
   (setq +corfu-want-tab-prefer-navigating-snippets t)
   (setq +corfu-want-tab-prefer-navigating-org-tables t)
@@ -95,6 +96,8 @@ Quality of life options
   (map! :map corfu-map
         :i "<tab>"     (lambda() (interactive) (corfu-insert) (corfu-complete))))
 #+end_src
+
+#+RESULTS:
 
 * Coding
 ** Lsp
@@ -108,10 +111,10 @@ Quality of life options
 (use-package! cmake-ide
   :config (cmake-ide-setup))
 
-(map! :map c++-mode-map
+(add-hook! c++-mode (map! :map c++-mode-map
       :leader
       :prefix ("l", "lsp")
-      :desc "Switch between header/source" "h" #'lsp-clangd-find-other-file)
+      :desc "Switch between header/source" "h" #'lsp-clangd-find-other-file))
 
 #+end_src
 
