@@ -67,7 +67,7 @@ Quality of life options
       "L" #'evil-end-of-line
       "H" #'evil-beginning-of-line
       "M-F" #'+format-lsp-buffer
-      "` RET" #'projectile-run-command)
+      "` RET" #'quickrun-shell)
 #+end_src
 
 * Plugins
@@ -106,7 +106,8 @@ Quality of life options
 ** C/C++
 #+begin_src emacs-lisp
 (after! lsp-mode
-  (setq lsp-clients-clangd-executable "clangd")) ; Ensure `clangd` is installed
+  (setq lsp-clients-clangd-executable "clangd"))
+
 
 (use-package! cmake-ide
   :config (cmake-ide-setup))
@@ -115,6 +116,13 @@ Quality of life options
       :leader
       :prefix ("l", "lsp")
       :desc "Switch between header/source" "h" #'lsp-clangd-find-other-file))
+
+(after! quickrun
+  (quickrun-add-command "c++/custom"
+    '((:command . "c++")
+      (:exec . ("%c -std=c++23 -o %e %s" "%e"))
+      (:remove . ("%e")))
+    :default "c++"))
 
 #+end_src
 
