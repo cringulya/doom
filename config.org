@@ -35,6 +35,10 @@ Quality of life options
 #+begin_src emacs-lisp
 (setq-default tab-width 2)
 (setq display-line-numbers 'relative)
+(setq mac-option-modifier 'meta)
+
+(setq split-width-threshold 0
+      split-height-threshold nil)
 
 (+global-word-wrap-mode +1)
 #+end_src
@@ -50,12 +54,17 @@ Quality of life options
       save-interprogram-paste-before-kill t
       mouse-yank-at-point t)
 
-
-(map! :gie "C-v" #'clipboard-yank)
-
-(map! :map evil-visual-state-map
-      :gv "C-c" #'clipboard-kill-ring-save)
+(if (featurep :system 'macos)
+    (map! :gie "s-v" #'clipboard-yank
+          :map evil-visual-state-map
+          :gv "s-c" #'clipboard-kill-ring-save)
+  (map! :gie "C-v" #'clipboard-yank
+        :map evil-visual-state-map
+        :gv "C-c" #'clipboard-kill-ring-save)
+  )
 #+end_src
+
+#+RESULTS:
 
 * Keybindings
 #+begin_src emacs-lisp
@@ -67,7 +76,7 @@ Quality of life options
       :n "Q" #'kill-this-buffer
       :n "L" #'evil-end-of-line
       :n "H" #'evil-beginning-of-line
-      :n "M-F" #'+format-lsp-buffer
+      :n "M-F" #'+format/buffer
       :gn "` RET" #'quickrun-shell)
 #+end_src
 
@@ -144,4 +153,14 @@ Quality of life options
 
 (add-hook 'latex-mode-hook (lambda ()
                              (add-hook 'after-save-hook #'TeX-command-run-all nil t)))
+
+(if (featurep :system 'macos)
+    (add-hook 'latex-mode-hook
+              (setq TeX-view-program-selection
+                    '((output-pdf "PDF Tools")
+                     (output-dvi "open")
+                     (output-pdf "open")
+                     (output-html "open")
+                     (output-pdf "preview-pane"))
+)))
 #+end_src
