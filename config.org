@@ -12,20 +12,22 @@
   - [[#dired][Dired]]
   - [[#completion][Completion]]
 - [[#coding][Coding]]
-  - [[#lsp][Lsp]]
+  - [[#eshell][Eshell]]
   - [[#cc][C/C++]]
   - [[#latex][Latex]]
 
 * Theme
 #+begin_src emacs-lisp
-(setq doom-theme 'doom-tokyo-night)
+(add-to-list 'custom-theme-load-path "~/.config/doom/themes")
+(setq doom-theme 'doom-rose-pine)
 #+end_src
 
 * Font
 #+begin_src emacs-lisp
-(setq doom-font (font-spec :family "Iosevka Nerd Font Mono" :size 22 :weight 'regular)
+(setq doom-font (font-spec :family "Iosevka Nerd Font Mono" :size 28 :weight 'regular)
+      doom-variable-pitch-font (font-spec :family "Iosevka Nerd Font Mono" :size 28 :weight 'regular)
       doom-symbol-font (font-spec :family "Iosevka Nerd Font Mono")
-      doom-big-font (font-spec :family "Iosevka Nerd Font Mono" :size 24))
+      doom-big-font (font-spec :family "Iosevka Nerd Font Mono" :size 33 :weight 'bold))
 #+end_src
 
 * Options
@@ -43,13 +45,13 @@ Quality of life options
 (remove-hook 'doom-first-input-hook #'evil-snipe-mode)
 
 ;; enable clipboard
-(setq select-enable-clipboard t
-      select-enable-primary t
+(setq select-enable-clipboard nil
+      select-enable-primary nil
       save-interprogram-paste-before-kill t
       mouse-yank-at-point t)
 
-(map! :map evil-insert-state-map
-      :gi "C-v" #'clipboard-yank)
+
+(map! :gie "C-v" #'clipboard-yank)
 
 (map! :map evil-visual-state-map
       :gv "C-c" #'clipboard-kill-ring-save)
@@ -57,17 +59,16 @@ Quality of life options
 
 * Keybindings
 #+begin_src emacs-lisp
-(map! :map evil-normal-state-map
-      "C-r" #'undo-redo
-      "C-j" #'evil-window-down
-      "C-k" #'evil-window-up
-      "C-h" #'evil-window-left
-      "C-l" #'evil-window-right
-      "Q" #'kill-this-buffer
-      "L" #'evil-end-of-line
-      "H" #'evil-beginning-of-line
-      "M-F" #'+format-lsp-buffer
-      "` RET" #'quickrun-shell)
+(map! :n "C-r" #'undo-redo
+      :n "C-j" #'evil-window-down
+      :n "C-k" #'evil-window-up
+      :n "C-h" #'evil-window-left
+      :n "C-l" #'evil-window-right
+      :n "Q" #'kill-this-buffer
+      :n "L" #'evil-end-of-line
+      :n "H" #'evil-beginning-of-line
+      :n "M-F" #'+format-lsp-buffer
+      :gn "` RET" #'quickrun-shell)
 #+end_src
 
 * Plugins
@@ -92,17 +93,27 @@ Quality of life options
   (setq +corfu-want-tab-prefer-navigating-org-tables t)
   (setq corfu-preview-current nil)
   (setq corfu-preselect 'first)
+  (setq corfu-count 6)
 
   (map! :map corfu-map
         :i "<tab>"     (lambda() (interactive) (corfu-insert) (corfu-complete))))
 #+end_src
 
-#+RESULTS:
 
 * Coding
-** Lsp
+** Eshell
 #+begin_src emacs-lisp
+(after! quickrun
+  (advice-add 'quickrun-shell :after
+              (lambda (&rest _)
+                (let ((eshell-buffer (get-buffer "*eshell-quickrun*")))
+                  (when eshell-buffer
+                    (pop-to-buffer eshell-buffer)))))
+  (map! :map quickrun--eshell-map
+        :gi "<escape>" #'quickrun--eshell-window-restore)
+  )
 #+end_src
+
 ** C/C++
 #+begin_src emacs-lisp
 (after! lsp-mode
